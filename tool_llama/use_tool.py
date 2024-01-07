@@ -208,13 +208,13 @@ class Use_Tool:
         if cls.check_tools(tools) == 'BaseModel':
             tools_name.append(tools.model_json_schema()['title'])
         elif cls.check_tools(tools) == 'Function':
-            tools_name.append(tools.__name__)
+            tools_name.append(tools[0].__name__)
         elif cls.check_tools(tools) == 'List':
             for tool in tools:
-                if cls.check_tools(tool) == "Function":
-                    tools_name.append(tools.__name__)
+                if cls.check_tools(tool) == 'Function':
+                    tools_name.append(tool[0].__name__)
                 elif cls.check_tools(tool) == "BaseModel":
-                    tools_name.append(tools.model_json_schema()['title'])
+                    tools_name.append(tool.model_json_schema()['title'])
                 else:
                     raise TypeError("Type of tools is errors.")
                 ...
@@ -373,11 +373,11 @@ class Use_Tool:
         if cls.check_tools(tools) == 'BaseModel':
             tool_dict[tools.model_json_schema()['title']] = tools
         elif cls.check_tools(tools) == 'Function':
-            tool_dict[tools.__name__] = tools
+            tool_dict[tools[0].__name__] = tools[0]
         elif cls.check_tools(tools) == 'List':
             for tool in tools:
-                if cls.check_tools(tool) == "Function":
-                    tool_dict[tool.__name__] = tool
+                if cls.check_tools(tool) == 'Function':
+                    tool_dict[tool[0].__name__] = tool[0]
                 elif cls.check_tools(tool) == "BaseModel":
                     tool_dict[tool.model_json_schema()['title']] = tool
                 else:

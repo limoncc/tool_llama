@@ -1,6 +1,6 @@
 [project]
 name = "tool_llama"
-version = "0.0.4"
+version = "0.0.5"
 authors = [
     { name = "limoncc", email = "limoncc@icloud.com" },
 ]
@@ -14,7 +14,7 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 [tool.hatch.build.targets.wheel]
-packages = ["src"]
+packages = ["tool_llama"]
 [tool.hatch.build.targets.sdist]
 include = [
     "tool_llama/",
