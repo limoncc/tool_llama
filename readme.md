@@ -1,8 +1,8 @@
 #### 一、一个简单介绍
 
-tool_llama是一个配合llama-cpp-python服务使用工具的包. llama-cpp-python目前[V0.2.26]版本, 必须使用如下方式才能使用函数调用功能。
+tool_llama是一个配合llama-cpp-python服务使用工具的包. llama-cpp-python目前[V0.2.26]版本, 必须使用如下方式才能使用函数调用功能。 该库使用了[Davor Runje](https://github.com/davorrunje)的对autogenV0.2.3贡献的部分代码，以解决函数输入格式问题。
 
-tool_llama is a package that works with the llama-cpp-python service. llama-cpp-python is currently in [V0.2.26] version and must use the following methods to use function calls.
+tool_llama is a package that works with the llama-cpp-python service. llama-cpp-python is currently in [V0.2.26] version and must use the following methods to use function calls.The library USES the [Davor Runje] (https://github.com/davorrunje) to part of the code, the contribution of autogenV0.2.3 function input format, in order to solve problems.
 
 ```shell
 python3 -m llama_cpp.server --model <model_path> --chat_format functionary
