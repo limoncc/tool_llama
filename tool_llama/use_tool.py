@@ -360,7 +360,8 @@ class Use_Tool:
                     # 这个应该怎么实现
                 response = func(*args, **kwargs)
                 if tools:
-                    response = self.gen_tool_response(kwargs['stream'], response)
+                    if "namespace" in response.choices[0].message.content:
+                        response = self.gen_tool_response(kwargs['stream'], response)
                 return response
             
             return wrapper
@@ -459,7 +460,8 @@ class Use_Tool:
                     kwargs["stream"] = False
                     stream = False
                     response = func(*args, **kwargs)
-                    response = self.gen_tool_response(stream, response)
+                    if "namespace" in response.choices[0].message.content:
+                        response = self.gen_tool_response(stream, response)
                 else:
                     response = func(*args, **kwargs)
                 ...
