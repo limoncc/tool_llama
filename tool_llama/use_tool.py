@@ -9,13 +9,13 @@
 
 import json
 import rtoml
-from src.utils.function_utils import get_function_schema
-from src.utils.basemodel_utils import get_model_schema
+from tool_llama.utils.function_utils import get_function_schema
+from tool_llama.utils.basemodel_utils import get_model_schema
 
 # 引入类型
 from pathlib import Path
 from inspect import isfunction
-from src.utils.basemodel_utils import BaseModel
+from tool_llama.utils.basemodel_utils import BaseModel
 from typing import Dict, Union, Type, Callable, Any, List, Tuple, Protocol, Optional, Iterator
 
 # llama相关类型
