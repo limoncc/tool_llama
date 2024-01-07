@@ -1,0 +1,23 @@
+[project]
+name = "tool_llama"
+version = "0.0.1"
+authors = [
+    { name = "limoncc", email = "limoncc@icloud.com" },
+]
+dependencies = ['rtoml>=0.9.0', "pydantic>=2.4.2","typing_extensions","llama-cpp-python",'openai>=1.3.5']
+description = "开源大模型使用工具的库"
+readme = "README.md"
+requires-python = ">=3"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+[tool.hatch.build.targets.wheel]
+packages = ["src/utils"]
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+[project.urls]
+"Homepage" = "https://github.com/limoncc"
+"Bug Tracker" = "https://github.com/limoncc/tool_llama/issues"
