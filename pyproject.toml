@@ -1,6 +1,6 @@
 [project]
 name = "tool_llama"
-version = "0.0.5"
+version = "0.0.7"
 authors = [
     { name = "limoncc", email = "limoncc@icloud.com" },
 ]

@@ -1,66 +1,76 @@
-#### 一、一个简单介绍
+English | [简体中文](readme_cn.md)
 
-tool_llama是一个配合llama-cpp-python服务使用工具的包. llama-cpp-python目前[V0.2.26]版本, 必须使用如下方式才能使用函数调用功能。 该库使用了[Davor Runje](https://github.com/davorrunje)的对autogenV0.2.3贡献的部分代码，以解决函数输入格式问题。
+#### One. A Simply Introduce
 
-tool_llama is a package that works with the llama-cpp-python service. llama-cpp-python is currently in [V0.2.26] version and must use the following methods to use function calls.The library USES the [Davor Runje] (https://github.com/davorrunje) to part of the code, the contribution of autogenV0.2.3 function input format, in order to solve problems.
+The tool_llama is an aid package specifically designed for seamless integration with the llama-cpp-python service. The current version of this service stands at [V0.2.26] make use of its function tool, it’s crucial to adhere to a particular usage approach as follows:
 
 ```shell
 python3 -m llama_cpp.server --model <model_path> --chat_format functionary
 ```
 
-这意味着你要使用这个小众的functionary-7b-v1模型, 并在非工具对话上失去chat_format的格式。llama-cpp-python的chat_format=functionary并没有实现其他模型的chat_format。理想情况应该是在通用聊天的情况，也能使用工具。就和openai一样。当前众多开源模型其实在提示词的引导下已经能比较好的使用工具, 所以开发了这个工具，以前完善开源工具链。tool_llama有如下特性：
-
-This means you use the niche functionary-7b-v1 model and lose the chat_format for non-tool conversations. llama-cpp-python's chat_format=functionary does not implement chat_format for other models. Ideally, you should be in a general chat situation where you can also use the tool. Just like openai. At present, many open source models can actually use tools better under the guidance of prompt words, so we developed this tool and improved the open source tool chain before. tool_llama has the following features:
-
-- 1、支持pydantic风格工具输入   
-- 2、外部的装饰器风格导入工具与数据模型, 然后使用工具
-- 3、支持llama-cpp-python通用聊天模式，不必为了使用工具启动两个模型
+This implies employing the less renowned functionary-7b-v1 model and sacrificing chat_format in non-tool discussions. In llama-cpp-python, the chat_format is set as ‘functionary’, which has’t achieved compatibility with other models’ chat_formats yet. Ideally, we should be able to use tools within general chats as well, similar to OpenAI’s approach. Most existing open-source models can now leverage tools effectively when guided by prompts. Consequently, tool_llama was developed to enhance the capabilities of current open-source toolchains. It boasts the following notable features:
 
 
-- 1, support pydantic style tool input 
-- 2, external decorator style import tool with data model, and then use the tool 
-- 3, support llama-cpp-python general chat mode, do not need to use the tool to start two models
+- 1, Offers compatibility with Pydantic style tool input formatting
+- 2, Externally, it facilitates an import of tools and data models in a decorator fashion before their utilization
+- 3, Enables the use of tools within llama-cpp-python’s general chat mode without necessitating the startup of two separate models
+
+you can install by pip:
+
+```shell
+pip install tool_llama
+```
 
 
-#### 二、autogen使用范式(autogen mode)
+#### Two. autogen mode
 
-下面是几个例子
-Here are a few examples
+Starting a model server by llama-cpp-python. NeuralHermes-2.5-Mistral-7B is recommended by me. 
+
+```shell
+python -m llama_cpp.server \
+--model ../models/mlabonne/NeuralHermes-2.5-Mistral-7B/Q4_K_M.gguf \
+--n_gpu_layers -1 --n_ctx 4096 --chat_format chatml
+```
+
+Here are an examples with using BaseModel.
 
 ```python
-# 工具
+# tools
 from openai import OpenAI
 from pprint import pprint
 from tool_llama import Use_Tool
-# 类型
+
+# types
 from openai import Stream
 from pydantic import BaseModel, Field
 from openai.types.chat import ChatCompletion, ChatCompletionChunk
 from llama_cpp.llama_types import ChatCompletionRequestMessage
-from typing import List, Optional, Union
+from typing import List, Union, Annotated
+
 
 class Expert(BaseModel):
-    """专家"""
+    """Expert"""
     
-    name: str = Field(description="专家名字, 例如李睿")
-    description: str = Field(description="关于专家的技能描述, 尽可能详细")
+    name: str = Field(description="Expert name, such as Li Rui")
+    description: str = Field(description="Describe the expert's skills in as much detail as possible")
     ...
 
 
 class AdvisoryGroup(BaseModel):
-    """顾问团"""
+    """Advisory Group"""
     
-    name: str = Field(description="顾问团名字")
-    target: str = Field(description="顾问团目标任务")
-    members: List[Expert] = Field(description="成员")
+    name: str = Field(description="Name of the advisory group")
+    target: str = Field(description="Advisory board objective mission")
+    members: List[Expert] = Field(description="members")
     ...
 
 
 toolkit = Use_Tool()
 
-# autogen使用范式
+
+# autogen model
 @toolkit.build(tools=[AdvisoryGroup], tool_choice=AdvisoryGroup, namespace="consultative_tool")
-def chat_infer(messages: List[ChatCompletionRequestMessage], stream=False, 
+def chat_infer(messages: List[ChatCompletionRequestMessage], stream=False,
                temperature: int = 0.1) -> Union[ChatCompletion, Stream[ChatCompletionChunk]]:
     api_key = "NULL"
     organization = "limoncc"
@@ -82,24 +92,46 @@ def chat_infer(messages: List[ChatCompletionRequestMessage], stream=False,
     return response
 
 
-prompt = "生成一个顾问团队，包含3个专家。以解决AI落地应用为目标。"
+prompt = "Generate a team of advisors, consisting of 3 experts. To solve the AI landing application as the goal."
 msg = [{"role": "user", "content": prompt}, ]
 response = chat_infer(msg, stream=True)
 
 result = toolkit.execute_function(response, tools=[AdvisoryGroup])
-pprint(result[0], sort_dicts=False)
-# output is AdvisoryGroup
-# {'name': 'AI落地应用专家团队',
-#  'target': '解决AI落地应用',
-#  'members': [Expert(name='专家A', description='具备丰富经验的AI应用开发专家'),
-#              Expert(name='专家B', description='深入了解企业AI落地实践的行业专家'),
-#              Expert(name='专家C', description='拥有多年跨领域AI应用研究经验的学者')]}
+pprint(result[0].__dict__, sort_dicts=False)
 ```
 
-#### 二、openai使用范式(openai model)
+the result you will get:
+```shell
+{'name': 'AI Landing Application Advisory Group',
+ 'target': 'Solving AI Landing Application Goal',
+ 'members': [Expert(name='Expert 1', description='An expert in AI and landing page optimization'),
+             Expert(name='Expert 2', description='A professional with expertise in application development and user experience design'),
+             Expert(name='Expert 3', description='An expert in AI-based problem solving and data analysis for landing page optimization')]}
+```
+
+For the python function, You need to do this as follows:
 
 ```python
-# openai使用范式
+from typing import List, Union, Annotated
+from tool_llama import Use_Tool
+
+def get_weather_from(location: Annotated[str, "地点"]) -> str:
+    return "The sun warm and bright."
+
+tools = [(get_weather_from, "Get the weather at the location")]
+toolkit = Use_Tool()
+
+@toolkit.build(tools=tools, namespace="functions")
+def chat_infer(messages, stream=False,):
+    ...
+```
+
+
+#### Three. openai model
+
+```python
+from tool_llama import Use_Tool
+
 toolkit = Use_Tool()
 mytools, mytool_choice = toolkit.gen_tools_api_from(tools=[AdvisoryGroup], tool_choice=AdvisoryGroup)
 
@@ -132,54 +164,42 @@ msg = [{"role": "user", "content": prompt}, ]
 response = tool_infer(msg, tools=mytools, tool_choice=mytool_choice, stream=False)
 result = toolkit.execute_function(response, tools=[AdvisoryGroup])
 pprint(result[0], sort_dicts=False)
-# output is AdvisoryGroup
-# {'name': 'AI落地应用专家团队',
-#  'target': '解决AI落地应用',
-#  'members': [Expert(name='专家A', description='具备丰富经验的AI应用开发专家'),
-#              Expert(name='专家B', description='深入了解企业AI落地实践的行业专家'),
-#              Expert(name='专家C', description='拥有多年跨领域AI应用研究经验的学者')]}
 ```
 
-当然你也可以不使用工具
-You can also use no tools.
+Of course, you can also go without tools:
 
 ```python
-prompt = "生成一个顾问团队，包含5个专家。以解决AI落地应用为目标。"
+prompt = "Generate a team of advisors, consisting of 3 experts. To solve the AI landing application as the goal."
 msg = [{"role": "user", "content": prompt}, ]
 response = tool_infer(msg, stream=True)
-
 for part in response:
     print(part.choices[0].delta.content or "", end='')  # type: ignore
+```
 
-# 建立一个高效的顾问团队需要结合各方面的专业知识和经验。在这里，我们将创建一个五人强大的AI落地应用专家团队：
-# 
-# 1. 产品顾问 - 艾米莉亚·卢克（Aemilia Luik）
-# 艾米莉亚是一位具有丰富经验的产品管理师，擅长将用户需求与技术实现结合起来。她曾成功地为多家企业开发和推出AI应用。
-# 2. 数据科学顾问 - 罗伯特·帕尔森（Robert Palmer）
-# 罗伯特是一位知名的数据科学家，擅长分析大量数据并提取有价值的见解。他曾为各种行业领域开发过AI算法和模型。
-# 3. 人工智能工程师 - 詹姆斯·麦克米尔（James MacMillan）
-# 詹姆斯是一位具有深厚技术实力的人工智能工程师，擅长开发和优化AI算法。他曾为多个企业构建了高效、可扩展的AI系统。
-# 4. 设计顾问 - 艾米莉亚·帕尔森（Aemilia Palmer）
-# 艾米利亚是一位具有丰富经验的产品设计师，擅长创造美观、易用且符合用户需求的界面和交互体验。她曾为多个AI应用程序设计过视觉元素。
-# 5. 商业顾问 - 安德鲁·帕尔森（Andrew Palmer）
-# 安德鲁是一位经验丰富的企业家，擅长策划和实施成功的营销和推广计划。他曾为多个AI应用程序提供过商业建议，帮助它们在市场上取得成功。
-# 
-# 这五位专家将共同合作，以最佳方式解决客户面临的各种AI落地问题，从产品设计到实施和推广。他们的多元化技能集会使团队具有强大的力量来帮助企业成功应用人工智能。
+```shell
+To create an effective team of advisors for solving the AI landing application problem, we need to consider individuals with diverse expertise and skill sets. Here's a suggested team comprising three experts:
 
+1. Data Scientist/Machine Learning Expert: This expert should have extensive knowledge in data analysis, machine learning algorithms, and natural language processing (NLP). They will be responsible for designing the AI models that power the landing application, ensuring they are accurate, efficient, and user-friendly. A candidate like Dr. Ziad Kobti, a renowned Data Scientist and Machine Learning Expert, would be an excellent addition to this team.
+2. Full Stack Developer: This expert should have experience in both frontend and backend development, as well as knowledge of integrating AI models into web applications. They will work closely with the data scientist to ensure that the landing application is developed according to best practices and user-friendly design principles. A skilled full stack developer like Angela Yu, who has worked on various projects involving AI integration, would be a valuable addition to this team.
+3. UX/UI Designer: This expert should have an eye for aesthetics and usability in digital products. They will collaborate with the data scientist and full-stack developer to create an intuitive user interface that enhances the overall experience of users interacting with the AI landing application. A talented designer like Sarah Dunn, who has worked on numerous projects involving UX/UI design for AI applications, would be a great fit for this team.
+
+Together, these three experts will bring their unique skills and perspectives to create an effective and user-friendly AI landing application that meets the desired goals.
 ```
 
 
-#### 三、使用自定义prompt
+#### Four、Use Custom Prompt
 
-一下是用默认的工具调用提示词,当然你可以修改然后这样使用即可。
-The next is to use the default tool to call the prompt word, of course you can modify it and use it as such.
+Above is the default tool call prompt word, Of course you can modify and use it as such：
 
 ```python
 from tool_llama import Use_Tool
 toolkit = Use_Tool.from_template("./your_prompt.toml")
 ```
 
+the Custom Prompt you can define by a toml file. The following is the default prompt: 
+
 ```toml
+# your_prompt.toml
 guide_prompt = """You are a helpful AI Assistant. You polite answers to the user's questions.
 1. If the question is unclear, Please polite ask the user about context.
 2. if the task has no available function in the namespace, Please reply:
@@ -198,7 +218,9 @@ guide_prompt = """You are a helpful AI Assistant. You polite answers to the user
 """
 tools_prompt_prefix = "// Supported function definitions that should be called when necessary."
 tools_prompt_suffix = "note: 请使用中文回答。"
-    
 ```
+
+
+
 
 
